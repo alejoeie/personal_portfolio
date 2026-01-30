@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import IssuPage from './IssuPage';
 import PysortPage from './PysortPage';
+import PacketAnalyzerPage from './PacketAnalyzerPage';
 
 type Project = {
   title: string;
@@ -35,9 +37,9 @@ function Section({ id, title, subtitle, children }: SectionProps) {
 const projects: Project[] = [
   {
     title: 'Packet Analyzer',
-    description: 'command-line tool designed to capture and analyze live network traffic. It focuses on parsing Ethernet and IPv4 headers to provide detailed insights into the captured packets.',
-    tags: ['C', 'CMake', 'Wireshark'],
-    href: 'https://github.com/alejoeie/PacketAnalyzer',
+    description: 'Advanced network traffic analysis tool with live packet capture. Built with C and libpcap for real-time Ethernet and IPv4 header parsing with modular architecture and comprehensive protocol analysis.',
+    tags: ['C', 'libpcap', 'Network Programming', 'CMake'],
+    href: '/packet-analyzer',
   },
   {
     title: 'PySort',
@@ -66,12 +68,104 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/issu" element={<IssuPage />} />
         <Route path="/pysort" element={<PysortPage />} />
+        <Route path="/packet-analyzer" element={<PacketAnalyzerPage />} />
       </Routes>
     </Router>
   );
 }
 
 function HomePage() {
+  const [typedText, setTypedText] = useState('');
+  const [skillIndex, setSkillIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  const skills = [
+    "C/C++",
+    "Python", 
+    "JavaScript",
+    "Git",
+    "Azure"
+  ];
+  
+  const currentSkill = skills[skillIndex];
+  
+  // Terminal typing state
+  const [terminalText, setTerminalText] = useState('');
+  const [terminalIndex, setTerminalIndex] = useState(0);
+  const [isTerminalTyping, setIsTerminalTyping] = useState(true);
+  
+  const terminalLines = [
+    "$ whoami",
+    "alejoeie - Embedded Software Engineer",
+    "",
+    "$ cat ~/about.txt",
+    "Engineer, crossfiter, hiker, traveler",
+    "Love discovering new places & meeting people",
+    "",
+    "$ cat ~/contact.txt", 
+    "📧 Email: alezph96@gmail.com",
+    "🔗 GitHub: github.com/alejoeie",
+    "💼 LinkedIn: linkedin.com/in/azunigap",
+    "",
+    "$ echo 'Ready to build something amazing!'",
+    "✓ Ready for opportunities"
+  ];
+  
+  useEffect(() => {
+    const handleTyping = () => {
+      if (!isDeleting) {
+        // Typing
+        if (typedText.length < currentSkill.length) {
+          const timeout = setTimeout(() => {
+            setTypedText(currentSkill.slice(0, typedText.length + 1));
+          }, 100 + Math.random() * 50);
+          return () => clearTimeout(timeout);
+        } else {
+          // Finished typing, pause then delete
+          const timeout = setTimeout(() => {
+            setIsDeleting(true);
+          }, 2000);
+          return () => clearTimeout(timeout);
+        }
+      } else {
+        // Deleting
+        if (typedText.length > 0) {
+          const timeout = setTimeout(() => {
+            setTypedText(typedText.slice(0, -1));
+          }, 50);
+          return () => clearTimeout(timeout);
+        } else {
+          // Finished deleting, move to next skill
+          setIsDeleting(false);
+          setSkillIndex((prev) => (prev + 1) % skills.length);
+        }
+      }
+    };
+
+    const timeout = setTimeout(handleTyping, 10);
+    return () => clearTimeout(timeout);
+  }, [typedText, currentSkill, isDeleting, skills.length]);
+
+  useEffect(() => {
+    if (terminalIndex < terminalLines.length) {
+      const currentLine = terminalLines[terminalIndex];
+      if (terminalText.length < currentLine.length) {
+        const timeout = setTimeout(() => {
+          setTerminalText(currentLine.slice(0, terminalText.length + 1));
+        }, 30 + Math.random() * 40);
+        return () => clearTimeout(timeout);
+      } else {
+        const timeout = setTimeout(() => {
+          setTerminalIndex(terminalIndex + 1);
+          setTerminalText('');
+        }, 500);
+        return () => clearTimeout(timeout);
+      }
+    } else {
+      setIsTerminalTyping(false);
+    }
+  }, [terminalText, terminalIndex, terminalLines]);
+
   return (
     <div className="page">
       <a className="skipLink" href="#main">
@@ -116,7 +210,8 @@ function HomePage() {
             <div className="heroCopy">
               <p className="badge">Available for opportunities</p>
               <h1 className="heroTitle">
-                From hardware to software, I build products that solve real problems.
+                Powered by <span className="skillHighlight">{typedText}</span> and passion
+                <span className="cursor visible">|</span>
               </h1>
               <p className="heroSubtitle">
                 Hello, Alejandro here. I am an Embedded Software Engineer with a passion for building innovative products.
@@ -142,23 +237,48 @@ function HomePage() {
               </dl>
             </div>
 
-            <aside className="heroCard" aria-label="Quick profile">
+            <aside className="heroCard" aria-label="Terminal profile">
               <div className="heroCardInner">
-                <p className="heroCardTitle">Quick intro</p>
-                <p className="heroCardBody">
-                  Engineer, crossfiter, hiker, traveler and adventurer. I love to discover and 
-                  explore new places, try new things and meet new people. This is my way of life.
-                </p>
-                <div className="heroCardLinks">
-                  <a className="textLink" href="mailto:alezph96@gmail.com">
-                    Email
-                  </a>
-                  <a className="textLink" href="https://github.com/alejoeie/">
-                    GitHub
-                  </a>
-                  <a className="textLink" href="https://www.linkedin.com/in/azunigap">
-                    LinkedIn
-                  </a>
+                <div className="terminalWidget terminalInline">
+                  <div className="terminalHeader">
+                    <div className="terminalButtons">
+                      <span className="terminalButton close"></span>
+                      <span className="terminalButton minimize"></span>
+                      <span className="terminalButton maximize"></span>
+                    </div>
+                    <div className="terminalTitle">terminal@alejoeie</div>
+                  </div>
+                  <div className="terminalContent">
+                    <div className="terminalLines">
+                      {terminalLines.slice(0, terminalIndex).map((line, index) => (
+                        <div key={index} className="terminalLine">
+                          {line.includes('Email:') ? (
+                            <span className="terminalText">
+                              📧 Email: <a href="mailto:alezph96@gmail.com" style={{color: '#4fc3f7'}}>alezph96@gmail.com</a>
+                            </span>
+                          ) : line.includes('GitHub:') ? (
+                            <span className="terminalText">
+                              🔗 GitHub: <a href="https://github.com/alejoeie" target="_blank" style={{color: '#4fc3f7'}}>github.com/alejoeie</a>
+                            </span>
+                          ) : line.includes('LinkedIn:') ? (
+                            <span className="terminalText">
+                              💼 LinkedIn: <a href="https://linkedin.com/in/azunigap" target="_blank" style={{color: '#4fc3f7'}}>linkedin.com/in/azunigap</a>
+                            </span>
+                          ) : (
+                            <span className="terminalText">{line}</span>
+                          )}
+                        </div>
+                      ))}
+                      {isTerminalTyping && (
+                        <div className="terminalLine">
+                          <span className="terminalText">
+                            {terminalLines[terminalIndex]?.slice(0, terminalText.length)}
+                            <span className="terminalCursor">|</span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </aside>
