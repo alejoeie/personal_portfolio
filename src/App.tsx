@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
+import IssuPage from './IssuPage';
+import PysortPage from './PysortPage';
 
 type Project = {
   title: string;
@@ -38,15 +41,15 @@ const projects: Project[] = [
   },
   {
     title: 'PySort',
-    description: 'Organizing files on Linux systems for a better visualization.',
-    tags: ['Python', 'Linux', 'Pytest'],
-    href: 'https://github.com/alejoeie/pysort',
+    description: 'Intelligent file organization system for Linux that automatically sorts files into appropriate directories based on their extensions using configurable JSON rules.',
+    tags: ['Python', 'Linux', 'CLI', 'File Management'],
+    href: '/pysort',
   },
   {
     title: 'ISSU Major to Major',
-    description: 'In service software upgrade for networking switches (code not available as this is company internal',
-    tags: ['System Architecture', 'GDB', 'C', 'C++'],
-    href: '#',
+    description: 'Zero-downtime software upgrade system for enterprise networking switches. Enables seamless transitions between major OS versions while maintaining continuous packet forwarding and network availability. The system validates compatibility across management and line modules, handles race conditions in multi-threaded C environments, and coordinates complex state transitions via REST APIs and the switchd daemon. Similar to Juniper\'s Unified ISSU and Arista\'s EOS Zero-Downtime Upgrade, this solution ensures carrier-grade reliability during critical infrastructure updates. (Code proprietary to HPE)',
+    tags: ['System Architecture', 'C', 'C++', 'REST API', 'Multi-threading'],
+    href: '/issu',
   },
 ];
 
@@ -58,6 +61,18 @@ const heroStats = [
 
 function App() {
   return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/issu" element={<IssuPage />} />
+        <Route path="/pysort" element={<PysortPage />} />
+      </Routes>
+    </Router>
+  );
+}
+
+function HomePage() {
+  return (
     <div className="page">
       <a className="skipLink" href="#main">
         Skip to content
@@ -65,12 +80,12 @@ function App() {
 
       <header className="header">
         <div className="container headerInner">
-          <a className="brand" href="#top" aria-label="Home">
+          <Link to="/" className="brand" aria-label="Home">
             <span className="brandMark" aria-hidden="true">
               AP
             </span>
             <span className="brandText">Alejandro Zuniga.</span>
-          </a>
+          </Link>
 
           <nav className="nav" aria-label="Primary">
             <a className="navLink" href="#about">
@@ -184,9 +199,15 @@ function App() {
                 <div className="projectTop">
                   <h3 className="projectTitle">{project.title}</h3>
                   {project.href ? (
-                    <a className="textLink" href={project.href}>
-                      View
-                    </a>
+                    project.href.startsWith('/') ? (
+                      <Link className="textLink" to={project.href}>
+                        View
+                      </Link>
+                    ) : (
+                      <a className="textLink" href={project.href}>
+                        View
+                      </a>
+                    )
                   ) : null}
                 </div>
                 <p className="projectBody">{project.description}</p>
